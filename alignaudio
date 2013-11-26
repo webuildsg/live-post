@@ -29,8 +29,8 @@ while getopts "hvpam" OPT; do
             USE_COMPARATOR="max"
             ;;
          :)
-  	echo "option -$OPTARG needs an argument"
-	;;
+    echo "option -$OPTARG needs an argument"
+    ;;
         \?)
             # getopts issues an error message
             echo $USAGE >&2
@@ -40,7 +40,7 @@ while getopts "hvpam" OPT; do
 done
 
 if [ $PRESERVE_PITCH == 1 ]; then
-	echo "We are preserving pitch";
+    echo "We are preserving pitch";
 fi
 
 shift $(($OPTIND - 1))
@@ -64,18 +64,18 @@ fi
 echo "Targetting $targetLength samples" ;
 
 for file in ${filesToProcess[@]}; do
-	lengthOfFile=`soxi -s $file`;
-	if [ $lengthOfFile  == $targetLength ]; then
-		echo "Skipping $file";
-	else
-		speed=$(bc <<< "scale = 10; $lengthOfFile / $targetLength")
+    lengthOfFile=`soxi -s $file`;
+    if [ $lengthOfFile  == $targetLength ]; then
+        echo "Skipping $file";
+    else
+        speed=$(bc <<< "scale = 10; $lengthOfFile / $targetLength")
                         echo "Processing $file";
                         fileOut="${file%.*}_aligned.${file#*.}";
                         echo "sox $file $fileOut speed $speed";
-		sox -V1 $file $fileOut speed $speed
+        sox -V1 $file $fileOut speed $speed
                         outLength=`soxi -s $fileOut`;
                         echo "$fileOut is now $outLength samples";
-	fi
+    fi
 done
 
 echo "Done!!"
