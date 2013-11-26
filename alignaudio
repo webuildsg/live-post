@@ -1,0 +1,81 @@
+#!/bin/bash
+set -e
+
+version="0.1"
+
+USAGE="Usage: `basename $0` [-p] [-m] [-a] files"
+
+PRESERVE_PITCH=0;
+USE_COMPARATOR="min"
+
+# Parse command line options.
+while getopts "hvpam" OPT; do
+    case "$OPT" in
+        h)
+            echo $USAGE
+            exit 0
+            ;;
+        v)
+            echo "`basename $0` version $version"
+            exit 0
+            ;;
+        p)
+            PRESERVE_PITCH=1
+            ;;
+        a)
+            USE_COMPARATOR="avg"
+            ;;
+        m)
+            USE_COMPARATOR="max"
+            ;;
+         :)
+  	echo "option -$OPTARG needs an argument"
+	;;
+        \?)
+            # getopts issues an error message
+            echo $USAGE >&2
+            exit 1
+            ;;
+    esac
+done
+
+if [ $PRESERVE_PITCH == 1 ]; then
+	echo "We are preserving pitch";
+fi
+
+shift $(($OPTIND - 1))
+
+filesToProcess="$@"
+
+#echo "Time to process : $filesToProcess"
+
+fileLengths=($(soxi -s $filesToProcess | sort -n) );
+
+#echo ${fileLengths[@]};
+
+if [ $USE_COMPARATOR == "avg" ]; then
+    targetLength=$(echo ${fileLengths[@]} | tr ' ' '\n' | awk '{total+=$1; count+=1;} END {printf("%.0f\n", total/count)}');
+elif [ $USE_COMPARATOR == "max" ]; then
+    targetLength=${fileLengths[${#fileLengths[@]}-1]};
+else
+    targetLength=${fileLengths[0]};
+fi
+
+echo "Targetting $targetLength samples" ;
+
+for file in ${filesToProcess[@]}; do
+	lengthOfFile=`soxi -s $file`;
+	if [ $lengthOfFile  == $targetLength ]; then
+		echo "Skipping $file";
+	else
+		speed=$(bc <<< "scale = 10; $lengthOfFile / $targetLength")
+                        echo "Processing $file";
+                        fileOut="${file%.*}_aligned.${file#*.}";
+                        echo "sox $file $fileOut speed $speed";
+		sox -V1 $file $fileOut speed $speed
+                        outLength=`soxi -s $fileOut`;
+                        echo "$fileOut is now $outLength samples";
+	fi
+done
+
+echo "Done!!"

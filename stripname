@@ -1,0 +1,42 @@
+#!/bin/bash
+version="0.1"
+
+USAGE="Usage: `basename $0` [-p] files"
+
+MOVE=0;
+
+# Parse command line options.
+while getopts "hvm" OPT; do
+    case "$OPT" in
+        h)
+            echo $USAGE
+            exit 0
+            ;;
+        v)
+            echo "`basename $0` version $version"
+            exit 0
+            ;;
+        m)
+	MOVE=1;
+	;;
+        \?)
+            # getopts issues an error message
+            echo $USAGE >&2
+            exit 1
+            ;;
+    esac
+done
+
+shift $(($OPTIND - 1))
+
+filesToProcess="$@"
+
+for file in ${filesToProcess[@]}; do
+	if [ $MOVE == 0 ]; then
+		cp $file ${file##*-}
+	else
+		mv $file ${file##*-}
+	fi
+done
+
+echo "Done!!"
