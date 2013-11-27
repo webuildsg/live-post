@@ -143,10 +143,8 @@ done;
 
 set -e
 
-echo " ";
-
-curl -q -T $MP3_FILE ftp://$FTP_USER:$PASS@sweska.net/public_html/webuildsg/live/audio/
-curl -q -T $OGG_FILE ftp://$FTP_USER:$PASS@sweska.net/public_html/webuildsg/live/audio/
+curl -q -ss -T $MP3_FILE -u $FTP_USER:$PASS  ftp://sweska.net/public_html/webuildsg/live/audio/
+curl -q -ss -T $OGG_FILE -u $FTP_USER:$PASS ftp://sweska.net/public_html/webuildsg/live/audio/
 
 echo "========================="
 echo "Updating Post with filesize"
