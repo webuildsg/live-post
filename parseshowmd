@@ -1,0 +1,48 @@
+#!/bin/bash
+set -e
+
+version="0.1"
+
+USAGE="Usage: `basename $0` <markdown file>"
+
+# Parse command line options.
+while getopts "hv" OPT; do
+    case "$OPT" in
+        h)
+            echo $USAGE
+            exit 0
+            ;;
+        v)
+            echo "`basename $0` version $version"
+            exit 0
+            ;;
+       \?)
+            # getopts issues an error message
+            echo $USAGE >&2
+            exit 1
+            ;;
+    esac
+done
+
+shift $(($OPTIND - 1))
+
+mdFile="$1"
+
+if [ ! -f $mdFile ]; then
+    echo "Can't find the file $mdFile"
+    exit -1;
+fi
+
+eval seperatorIndex=(`awk '/---/{print(NR)}' $mdFile`);
+
+#echo ${seperatorIndex[1]}
+
+startIndex=$(( ${seperatorIndex[0]} + 1 ));
+endIndex=$(( ${seperatorIndex[1]} - 1 ));
+
+#echo "Getting YAML from $startIndex to $endIndex";
+
+sedLineNumbers="${startIndex},${endIndex}p"
+# echo $sedLineNumbers;
+
+sed -n $sedLineNumbers $mdFile

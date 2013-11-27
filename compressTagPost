@@ -1,0 +1,159 @@
+#!/bin/bash
+set -e
+
+version="0.1"
+
+USAGE="Usage: `basename $0` -a audioFile -p postfile"
+AUDIO_FILE=""
+POST_FILE=""
+
+FTP_USER="sweska3@sweska.net"
+
+# Default fields.
+ARTIST="We Build SG"
+ALBUM="We Build SG LIVE"
+YEAR=`date +%Y`
+GENRE="Podcast"
+URL="http://live.webuild.sg/"
+
+ALBUM_ART_FILE="/Users/chinmay/Dropbox Personal/Dropbox/My Share/WeBuildSG/Live/logo.png"
+
+
+#Fields to update
+TRACK="000"
+TITLE="000 We Build SG LIVE - Hello World"
+FILE_NAME="000-hello-world.mp3"
+
+# Parse command line options.
+while getopts "hva:p:" OPT; do
+    case "$OPT" in
+        h)
+            echo $USAGE
+            exit 0
+            ;;
+        v)
+            echo "`basename $0` version $version"
+            exit 0
+            ;;
+        a)
+            AUDIO_FILE=$OPTARG
+            ;;
+        p)
+            POST_FILE=$OPTARG
+            ;;
+       \?)
+            # getopts issues an error message
+            echo $USAGE >&2
+            exit 1
+            ;;
+    esac
+done
+
+shift $(($OPTIND - 1));
+
+if [ "$AUDIO_FILE" == "" ]; then
+    echo "Error! No Audio File Specified";
+    echo $USAGE
+    exit -1;
+fi
+
+
+if [ ! -f "$AUDIO_FILE" ]; then
+    echo "Error! Audio File $AUDIO_FILE can't be found";
+    exit -1;
+fi
+
+
+if [ "$POST_FILE" == "" ]; then
+    echo "Error! No Post File Specified";
+    echo $USAGE
+    exit -1;
+fi
+
+if [ ! -f "$POST_FILE" ]; then
+    echo "Error! POST_FILE File $POST_FILE can't be found";
+    exit -1;
+fi
+
+echo "========================="
+echo "Gathering Data"
+echo "========================="
+
+IFS=$'\n'
+yamlData=($(./parseshowmd $POST_FILE));
+unset IFS
+
+#TRACK="000"
+#TITLE="000 We Build SG LIVE - Hello World"
+#FILE_NAME="000-hello-world.mp3"
+
+for (( i=0; i<${#yamlData[@]}; i++ )); do
+    thisLine=${yamlData[$i]}
+    if echo $thisLine | grep -q 'title:' ; then
+        TRACK=$(echo $thisLine | grep -Eo '[[:digit:]]{3}')
+        #echo "found track $TRACK";
+        title_query="s/^.*$TRACK //p"
+        GUEST=$(echo $thisLine | sed -n -e "$title_query")
+        TITLE="$TRACK $ALBUM - $GUEST"
+        #echo "found title ${TITLE}";
+    elif echo $thisLine | grep -q 'permalink:' ; then
+        FILE_NAME=$(echo $thisLine | sed -E 's/.*\/(.*)\//\1/');
+        FILE_NAME="$FILE_NAME.mp3"
+        #echo "found filename $FILE_NAME"
+    fi
+done
+
+if [[ ! -e "$ALBUM_ART_FILE" ]]; then
+    echo "Error! Cannot find Album Art File $ALBUM_ART_FILE";
+    exit -1;
+fi
+
+echo "========================="
+echo "Generating MP3 File"
+echo "========================="
+
+MP3_FILE="${AUDIO_FILE%.*}.mp3"
+
+lameCMD="lame -m m -b 64 --cbr --tt \"$TITLE\" --ta \"$ARTIST\" --tl \"$ALBUM\" --ty $YEAR --tn $TRACK --tg $GENRE --ti \"$ALBUM_ART_FILE\" $AUDIO_FILE $MP3_FILE"
+
+#eval $lameCMD
+
+
+echo "========================="
+echo "Generating OGG File"
+echo "========================="
+
+OGG_FILE="${AUDIO_FILE%.*}.ogg"
+
+#sox $AUDIO_FILE -C 8 $OGG_FILE
+
+echo "========================="
+echo "Uploading to FTP"
+echo "========================="
+
+set +e
+
+read -sp "Please Enter the FTP Password : " PASS
+curl -q -ss -u $FTP_USER:$PASS ftp://sweska.net/public_html/webuildsg/live/audio/ >/dev/null
+while [ $? != 0 ]; do
+    echo ""
+    read -sp "Incorrect Password. Please Re-Enter the FTP Password : " PASS
+    curl -q -ss -u $FTP_USER:$PASS ftp://sweska.net/public_html/webuildsg/live/audio/ >/dev/null
+done;
+
+set -e
+
+echo " ";
+
+curl -q -T $MP3_FILE ftp://$FTP_USER:$PASS@sweska.net/public_html/webuildsg/live/audio/
+curl -q -T $OGG_FILE ftp://$FTP_USER:$PASS@sweska.net/public_html/webuildsg/live/audio/
+
+echo "========================="
+echo "Updating Post with filesize"
+echo "========================="
+
+fileSize=$( stat -f "%z" ${AUDIO_FILE%.*}.mp3)
+#echo $fileSize
+updateJekyllPost -k "length" -a $fileSize $POST_FILE
+
+
