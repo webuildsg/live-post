@@ -112,20 +112,20 @@ echo "========================="
 echo "Generating MP3 File"
 echo "========================="
 
-MP3_FILE="${AUDIO_FILE%.*}.mp3"
+MP3_FILE="$FILE_NAME"
 
 lameCMD="lame -m m -b 64 --cbr --tt \"$TITLE\" --ta \"$ARTIST\" --tl \"$ALBUM\" --ty $YEAR --tn $TRACK --tg $GENRE --ti \"$ALBUM_ART_FILE\" $AUDIO_FILE $MP3_FILE"
 
-#eval $lameCMD
+eval $lameCMD
 
 
 echo "========================="
 echo "Generating OGG File"
 echo "========================="
 
-OGG_FILE="${AUDIO_FILE%.*}.ogg"
+OGG_FILE="${FILE_NAME%.*}.ogg"
 
-#sox $AUDIO_FILE -C 8 $OGG_FILE
+sox $AUDIO_FILE -C 8 $OGG_FILE
 
 echo "========================="
 echo "Uploading to FTP"
@@ -143,6 +143,8 @@ done;
 
 set -e
 
+echo "OK"
+
 curl -q -ss -T $MP3_FILE -u $FTP_USER:$PASS  ftp://sweska.net/public_html/webuildsg/live/audio/
 curl -q -ss -T $OGG_FILE -u $FTP_USER:$PASS ftp://sweska.net/public_html/webuildsg/live/audio/
 
@@ -150,8 +152,9 @@ echo "========================="
 echo "Updating Post with filesize"
 echo "========================="
 
-fileSize=$( stat -f "%z" ${AUDIO_FILE%.*}.mp3)
-#echo $fileSize
+fileSize=$( stat -f "%z" $MP3_FILE)
 updateJekyllPost -k "length" -a $fileSize $POST_FILE
 
-
+echo "========================="
+echo "Done"
+echo "========================="
