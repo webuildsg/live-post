@@ -25,7 +25,7 @@ TITLE="000 We Build SG LIVE - Hello World"
 FILE_NAME="000-hello-world.mp3"
 
 # Parse command line options.
-while getopts "hva:p:" OPT; do
+while getopts "hva:p:r:" OPT; do
     case "$OPT" in
         h)
             echo $USAGE
@@ -40,6 +40,9 @@ while getopts "hva:p:" OPT; do
             ;;
         p)
             POST_FILE=$OPTARG
+            ;;
+        r)
+            ALBUM_ART_FILE=$OPTARG
             ;;
        \?)
             # getopts issues an error message
@@ -72,6 +75,18 @@ fi
 
 if [ ! -f "$POST_FILE" ]; then
     echo "Error! POST_FILE File $POST_FILE can't be found";
+    exit -1;
+fi
+
+if [ "$ALBUM_ART_FILE" == "" ]; then
+    echo "Error! No Album Art File Specified";
+    echo $USAGE
+    exit -1;
+fi
+
+
+if [ ! -f "$ALBUM_ART_FILE" ]; then
+    echo "Error! Album Art $ALBUM_ART_FILE can't be found";
     exit -1;
 fi
 
