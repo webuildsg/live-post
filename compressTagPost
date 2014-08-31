@@ -135,13 +135,13 @@ lameCMD="lame -m m -b 64 --cbr --tt \"$TITLE\" --ta \"$ARTIST\" --tl \"$ALBUM\" 
 eval $lameCMD
 
 
-echo "========================="
-echo "Generating OGG File"
-echo "========================="
+# echo "========================="
+# echo "Generating OGG File"
+# echo "========================="
 
-OGG_FILE="${FILE_NAME%.*}.ogg"
+# OGG_FILE="${FILE_NAME%.*}.ogg"
 
-sox $AUDIO_FILE -C 8 "$AUDIO_FILE_PATH/$OGG_FILE"
+# sox $AUDIO_FILE -C 8 "$AUDIO_FILE_PATH/$OGG_FILE"
 
 echo "========================="
 echo "Uploading to FTP"
@@ -162,7 +162,7 @@ set -e
 echo "OK"
 
 curl -q -ss -T "$AUDIO_FILE_PATH/$MP3_FILE" -u $FTP_USER:$PASS  ftp://sweska.net/public_html/webuildsg/live/audio/
-curl -q -ss -T "$AUDIO_FILE_PATH/$OGG_FILE" -u $FTP_USER:$PASS ftp://sweska.net/public_html/webuildsg/live/audio/
+# curl -q -ss -T "$AUDIO_FILE_PATH/$OGG_FILE" -u $FTP_USER:$PASS ftp://sweska.net/public_html/webuildsg/live/audio/
 
 echo "========================="
 echo "Updating Post with filesize"
