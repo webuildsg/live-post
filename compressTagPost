@@ -16,7 +16,7 @@ YEAR=`date +%Y`
 GENRE="Podcast"
 URL="http://live.webuild.sg/"
 
-ALBUM_ART_FILE="/Users/chinmay/.dropbox-two/Dropbox/My Share/WeBuildSG/Live/logo.png"
+ALBUM_ART_FILE="/Users/chinmay/Dropbox (Personal)/My Share/WeBuildSG/Live/logo.png"
 
 
 #Fields to update
