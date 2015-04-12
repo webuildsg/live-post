@@ -7,6 +7,7 @@ USAGE="Usage: `basename $0` -a audioFile -p postfile"
 AUDIO_FILE=""
 POST_FILE=""
 
+POST_DIR="/Users/chinmay/Documents/Personal/Projects/webuildlive-post/"
 FTP_USER="sweska3@sweska.net"
 
 # Default fields.
@@ -95,7 +96,7 @@ echo "Gathering Data"
 echo "========================="
 
 IFS=$'\n'
-yamlData=($(./parseshowmd $POST_FILE));
+yamlData=($($POST_DIR/parseshowmd $POST_FILE));
 unset IFS
 
 #TRACK="000"
@@ -169,7 +170,7 @@ echo "Updating Post with filesize"
 echo "========================="
 
 fileSize=$( stat -f "%z" "$AUDIO_FILE_PATH/$MP3_FILE")
-updateJekyllPost -k "length" -a $fileSize $POST_FILE
+$POST_DIR/updateJekyllPost -k "length" -a $fileSize $POST_FILE
 
 echo "========================="
 echo "Done"
