@@ -7,7 +7,7 @@ USAGE="Usage: `basename $0` -a audioFile -p postfile"
 AUDIO_FILE=""
 POST_FILE=""
 
-POST_DIR="/Users/chinmay/Documents/Personal/Projects/webuildlive-post/"
+POST_DIR="/Users/chinmay/Documents/Personal/Projects/webuild/live-post/"
 FTP_USER="sweska3@sweska.net"
 
 # Default fields.
@@ -17,7 +17,7 @@ YEAR=`date +%Y`
 GENRE="Podcast"
 URL="http://live.webuild.sg/"
 
-ALBUM_ART_FILE="/Users/chinmay/Dropbox (Personal)/My Share/WeBuildSG/Live/logo.png"
+ALBUM_ART_FILE="/Users/chinmay/Dropbox/My Share/WeBuildSG/Live/logo.png"
 
 
 #Fields to update
